@@ -1454,7 +1454,7 @@ get_object(radio_param_t param, void *dest, size_t size)
       return RADIO_RESULT_INVALID_VALUE;
     }
     /* Assigned value: a pointer to the TSCH timing in usec */
-    *(const uint16_t **)dest = CC1200_RF_CFG.tsch_timing;
+    *(const uint32_t **)dest = CC1200_RF_CFG.tsch_timing;
     return RADIO_RESULT_OK;
   }
 #endif /* MAC_CONF_WITH_TSCH */

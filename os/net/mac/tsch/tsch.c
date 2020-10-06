@@ -57,6 +57,7 @@
 #include "net/mac/mac-sequence.h"
 #include "lib/random.h"
 #include "net/routing/routing.h"
+#include "watchdog.h"
 
 #if TSCH_WITH_SIXTOP
 #include "net/mac/tsch/sixtop/sixtop.h"
@@ -93,9 +94,9 @@ uint8_t tsch_hopping_sequence[TSCH_HOPPING_SEQUENCE_MAX_LEN];
 struct tsch_asn_divisor_t tsch_hopping_sequence_length;
 
 /* Default TSCH timeslot timing (in micro-second) */
-static const uint16_t *tsch_default_timing_us;
+static const uint32_t *tsch_default_timing_us;
 /* TSCH timeslot timing (in micro-second) */
-uint16_t tsch_timing_us[tsch_ts_elements_count];
+uint32_t tsch_timing_us[tsch_ts_elements_count];
 /* TSCH timeslot timing (in rtimer ticks) */
 rtimer_clock_t tsch_timing[tsch_ts_elements_count];
 
@@ -796,11 +797,11 @@ PT_THREAD(tsch_scan(struct pt *pt))
     /* Turn radio on and wait for EB */
     NETSTACK_RADIO.on();
 
-    is_packet_pending = NETSTACK_RADIO.pending_packet();
+    RTIMER_BUSYWAIT_UNTIL_ABS((is_packet_pending = NETSTACK_RADIO.pending_packet()), t0, TSCH_WAIT_EB);
     if(!is_packet_pending && NETSTACK_RADIO.receiving_packet()) {
       /* If we are currently receiving a packet, wait until end of reception */
       t0 = RTIMER_NOW();
-      RTIMER_BUSYWAIT_UNTIL_ABS((is_packet_pending = NETSTACK_RADIO.pending_packet()), t0, RTIMER_SECOND / 100);
+      RTIMER_BUSYWAIT_UNTIL_ABS((is_packet_pending = NETSTACK_RADIO.pending_packet()), t0, TSCH_WAIT_EB);
     }
 
     if(is_packet_pending) {
@@ -817,7 +818,7 @@ PT_THREAD(tsch_scan(struct pt *pt))
         LOG_INFO("scan: received packet (%u bytes) on channel %u\n", input_eb.len, current_channel);
 
         /* Sanity-check the timestamp */
-        if(ABS(RTIMER_CLOCK_DIFF(t0, t1)) < 2ul * RTIMER_SECOND) {
+        if(ABS(RTIMER_CLOCK_DIFF(t0, t1)) < TSCH_WAIT_EB) {
           tsch_associate(&input_eb, t0);
         } else {
           LOG_WARN("scan: dropping packet, timestamp too far from current time %u %u\n",

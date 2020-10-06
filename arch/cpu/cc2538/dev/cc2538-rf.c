@@ -1050,7 +1050,7 @@ get_object(radio_param_t param, void *dest, size_t size)
       return RADIO_RESULT_INVALID_VALUE;
     }
     /* Assigned value: a pointer to the TSCH timing in usec */
-    *(const uint16_t **)dest = tsch_timeslot_timing_us_10000;
+    *(const uint32_t **)dest = tsch_timeslot_timing_us_10000;
     return RADIO_RESULT_OK;
   }
 #endif /* MAC_CONF_WITH_TSCH */

@@ -71,6 +71,11 @@ frequency hopping for enhanced reliability.
 #include TSCH_CONF_ARCH_HDR_PATH
 #endif /* TSCH_CONF_ARCH_HDR_PATH */
 
+/* Time listening for an incoming EB in a given channel */ 
+#ifndef TSCH_WAIT_EB
+#define TSCH_WAIT_EB (RTIMER_SECOND / 100)
+#endif
+
 /*********** Callbacks *********/
 
 /* Link callbacks to RPL in case RPL is enabled */
