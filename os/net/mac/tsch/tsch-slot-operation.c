@@ -734,7 +734,7 @@ PT_THREAD(tsch_tx_slot(struct pt *pt, struct rtimer *t))
         log->tx.mac_tx_status = mac_tx_status;
         log->tx.num_tx = current_packet->transmissions;
         log->tx.datalen = queuebuf_datalen(current_packet->qb);
-        log->tx.drift = drift_correction;
+        log->tx.drift = RTIMERTICKS_TO_US(drift_correction);
         log->tx.drift_used = is_drift_correction_used;
         log->tx.is_data = ((((uint8_t *)(queuebuf_dataptr(current_packet->qb)))[0]) & 7) == FRAME802154_DATAFRAME;
 #if LLSEC802154_ENABLED
