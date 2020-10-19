@@ -309,8 +309,8 @@ tsch_schedule_slot_operation(struct rtimer *tm, rtimer_clock_t ref_time, rtimer_
   if(missed) {
     TSCH_LOG_ADD(tsch_log_message,
                 snprintf(log->message, sizeof(log->message),
-                    "!dl-miss %s %d %d",
-                        str, (int)(now-ref_time), (int)offset);
+                    "!dl-miss %s %ld %ld",
+                        str, RTIMERTICKS_TO_US((int)(now-ref_time)), RTIMERTICKS_TO_US((int)offset));
     );
   } else {
     r = rtimer_set(tm, ref_time + offset, 1, (void (*)(struct rtimer *, void *))tsch_slot_operation, NULL);
@@ -971,11 +971,11 @@ PT_THREAD(tsch_rx_slot(struct pt *pt, struct rtimer *t))
               linkaddr_copy(&log->rx.src, (linkaddr_t *)&frame.src_addr);
               log->rx.is_unicast = frame.fcf.ack_required;
               log->rx.datalen = current_input->len;
-              log->rx.drift = drift_correction;
+              log->rx.drift = RTIMERTICKS_TO_US(drift_correction);
               log->rx.drift_used = is_drift_correction_used;
               log->rx.is_data = frame.fcf.frame_type == FRAME802154_DATAFRAME;
               log->rx.sec_level = frame.aux_hdr.security_control.security_level;
-              log->rx.estimated_drift = estimated_drift;
+              log->rx.estimated_drift = RTIMERTICKS_TO_US(estimated_drift);
               log->rx.seqno = frame.seq;
             );
           }
